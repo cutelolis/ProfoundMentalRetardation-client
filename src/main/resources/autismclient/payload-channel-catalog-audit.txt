@@ -1,0 +1,271 @@
+AUTISM payload channel catalog audit
+
+Rule:
+Exact channel presets require public source, official docs, or observed minecraft:register evidence.
+Wildcard rows are templates/highlights only. They are not proof of a plugin identity and cannot be registered as-is.
+Shared transport channels such as BungeeCord identify the transport, not every plugin that uses it.
+
+Status legend:
+- EXACT_CHANNEL: source/docs prove the exact registerable channel.
+- CORE_CHANNEL: vanilla/legacy traffic we log/highlight but do not register as a Bukkit subscription target.
+- SHARED_TRANSPORT: plugin uses a shared channel such as BungeeCord; no plugin-specific channel is proven.
+- TEMPLATE_ONLY: useful namespace/prefix for user completion, but no exact public channel proof.
+- NO_PUBLIC_CHANNEL_FOUND: public source/docs were checked and no plugin-message/custom-payload channel was found.
+- TAG_PACKET_ONLY: public source shows non-plugin-message packet/tag behavior; keep templates until exact payload proof exists.
+
+Core / vanilla / proxy:
+- Minecraft Brand | minecraft:brand | CORE_CHANNEL
+  Vanilla brand custom payload. Logged when observed; not a Bukkit/Paper subscription target.
+- Minecraft Register / Unregister | minecraft:register, minecraft:unregister, REGISTER, UNREGISTER | CORE_CHANNEL
+  Plugin-channel registration traffic. Logged and decoded when observed; not registered by AUTISM.
+- BungeeCord Main | bungeecord:main | EXACT_CHANNEL
+  Source/docs: BungeeCord/Velocity plugin messaging docs describe modern namespaced proxy messaging.
+- BungeeCord | BungeeCord | CORE_CHANNEL
+  Legacy proxy plugin messaging channel. Kept for watch/highlight compatibility.
+
+Verified exact plugin/mod channels:
+- ViaVersion | vv:server_details, vv:proxy_details, vv:mod_details, vv:app_details | EXACT_CHANNEL
+  Source/docs: ViaVersion Server and Player Details Protocol documents vv:* details channels.
+  Source hint: ViaVersion ConnectionDetails.SERVER_CHANNEL / PROXY_CHANNEL / MOD_CHANNEL / APP_CHANNEL.
+- WorldEdit | worldedit:cui | EXACT_CHANNEL
+  Source: WorldEditPlugin.CUI_PLUGIN_CHANNEL = "worldedit:cui"; registered incoming/outgoing and sent to CUI clients.
+- Fabric Networking API | fabric:split | EXACT_CHANNEL
+  Source: FabricSplitPacketPayload.TYPE = Identifier.fromNamespaceAndPath("fabric", "split"); registered by NetworkingImpl.init().
+- Fabric Networking API | c:register, c:version | EXACT_CHANNEL
+  Source: CommonRegisterPayload.TYPE = Identifier.parse("c:register"); CommonVersionPayload.TYPE = Identifier.parse("c:version").
+  Note: c:* is a common networking protocol namespace and is not treated as exact plugin identity proof.
+- QuickShop-Hikari | quickshop:bungee | EXACT_CHANNEL
+  Source: CHAT_FORWARD_CHANNEL / QUICKSHOP_BUNGEE_CHANNEL = "quickshop:bungee"; Bukkit/Bungee/Velocity compatibility registers and sends payloads.
+- CoreProtect | coreprotect:handshake, coreprotect:data | EXACT_CHANNEL
+  Docs: CoreProtect Networking API documents both channels.
+  Source hint: PluginChannelHandshakeListener.pluginChannel = "coreprotect:handshake"; PluginChannelListener.pluginChannel = "coreprotect:data".
+- ClaimMessenger | claimmaps:claim, claimmaps:no_claims, claimmaps:delete_claim | EXACT_CHANNEL
+  Source: ClaimMessenger constants CLAIM_CHANNEL, NO_CLAIMS_CHANNEL, and DELETE_CHANNEL are channel("claim"), channel("no_claims"), and channel("delete_claim").
+  Source hint: ClaimMessenger registers all three as outgoing plugin channels and ClaimChannel sends payloads on them.
+- Open Parties and Claims | openpartiesandclaims:main | EXACT_CHANNEL
+  Source: OpenPartiesAndClaims.MOD_ID = "openpartiesandclaims"; MAIN_CHANNEL_LOCATION = new ResourceLocation(MOD_ID, "main").
+- FTB Chunks | ftbchunks:login_data_packet, ftbchunks:send_general_data_packet, ftbchunks:send_many_chunks_packet, ftbchunks:send_chunk_packet, ftbchunks:loaded_chunk_view_packet, ftbchunks:request_map_data_packet, ftbchunks:request_chunk_change_packet, ftbchunks:chunk_change_response_packet, ftbchunks:open_claim_gui_packet, ftbchunks:update_force_load_expiry_packet, ftbchunks:teleport_from_map_packet, ftbchunks:sync_tx_packet, ftbchunks:sync_rx_packet, ftbchunks:player_visibility_packet, ftbchunks:player_death_packet, ftbchunks:request_block_color_packet, ftbchunks:add_waypoint_packet, ftbchunks:share_waypoint_packet, ftbchunks:send_player_position_packet | EXACT_CHANNEL
+  Source: FTB Chunks packet classes declare CustomPacketPayload.Type entries using FTBChunksAPI.id("...").
+- FTB Teams | ftbteams:open_gui, ftbteams:open_my_team_gui, ftbteams:create_party, ftbteams:player_gui_operation, ftbteams:send_message, ftbteams:send_message_response, ftbteams:sync_teams, ftbteams:sync_msg_history, ftbteams:update_properties_request, ftbteams:update_properties_response, ftbteams:update_presence, ftbteams:toggle_chat_redirection, ftbteams:toggle_chat_response | EXACT_CHANNEL
+  Source: FTB Teams packet classes declare CustomPacketPayload.Type entries using FTBTeamsAPI.id("...").
+- Simple Voice Chat | voicechat:secret, voicechat:request_secret, vc:secret, vc:request_secret | EXACT_CHANNEL
+  Source: VoiceProxy.SECRET_CHANNEL / REQUEST_SECRET_CHANNEL and 1.12 legacy constants.
+- Simple Voice Chat | voicechat:states, voicechat:state, voicechat:update_state, voicechat:remove_state, voicechat:set_group, voicechat:add_group, voicechat:create_group, voicechat:leave_group, voicechat:remove_group, voicechat:joined_group, voicechat:add_category, voicechat:remove_category | EXACT_CHANNEL
+  Source: common net packet classes declare CustomPacketPayload.Type identifiers under namespace voicechat.
+- Plasmo Voice | plasmo:voice/v2, plasmo:voice/v2/installed, plasmo:voice/v2/service | EXACT_CHANNEL
+  Source: BaseVoiceServer.CHANNEL_STRING / FLAG_CHANNEL_STRING / SERVICE_CHANNEL_STRING and proxy equivalents.
+- Floodgate / Geyser | floodgate:skin, floodgate:form, floodgate:transfer, floodgate:packet | EXACT_CHANNEL
+  Source: Floodgate channel classes return these identifiers; Geyser PluginMessageChannels exposes the same constants.
+- TAB | tab:bridge-6 | EXACT_CHANNEL
+  Source: TabConstants.PLUGIN_MESSAGE_CHANNEL_NAME = "tab:bridge-6"; Bungee/Velocity platforms register/send this channel.
+- LuckPerms | luckperms:update | EXACT_CHANNEL
+  Source: AbstractPluginMessageMessenger.CHANNEL = "luckperms:update"; Bukkit/Velocity/Sponge/Forge/Fabric messengers register/send it.
+- SkinsRestorer | sr:messagechannel | EXACT_CHANNEL
+  Source: SRHelpers.MESSAGE_CHANNEL = "sr:messagechannel"; Bukkit/Bungee/Velocity/Fabric/NeoForge integrations register/send it.
+- Emotecraft | emotecraft:emote, emotecraft:stream | EXACT_CHANNEL
+  Source: CommonData.MOD_ID = "emotecraft"; playEmoteID = "emote"; emoteStreamID = "stream"; Bukkit/Fabric/NeoForge code registers/sends both payloads.
+- Essential | essential:outfits | EXACT_CHANNEL
+  Source: OutfitUpdatesPayload.CHANNEL_ID = UIdentifier("essential", "outfits"); Essential registers/handles this custom payload.
+- LabyMod 4 | labymod:neo | EXACT_CHANNEL
+  Source: LabyModProtocol constructs its protocol identifier with PayloadChannelIdentifier.create("labymod", "neo").
+- LabyMod 3 | labymod3:main | EXACT_CHANNEL
+  Docs: LabyMod protocol docs state the plugin channel is labymod3:main; join INFO is sent on that channel.
+- Xaero Minimap / Xaero World Map | xaerominimap:main, xaeroworldmap:main | EXACT_CHANNEL
+  Source: MapModCompanion Channels.XAERO_MINIMAP_CHANNEL / XAERO_WORLDMAP_CHANNEL and minimap-control XAEROS_CHANNEL / XAEROS_MAP_CHANNEL use these exact channels.
+- JourneyMap permissions | journeymap:perm_req | EXACT_CHANNEL
+  Source: minimap-control registers journeymap:perm_req and JMHandler handles/replies to permission requests on it.
+- WorldInfo / map world id | worldinfo:world_id | EXACT_CHANNEL
+  Source: MapModCompanion WORLDID_CHANNEL and minimap-control WORLDINFO_CHANNEL use worldinfo:world_id for world-id request/response traffic.
+  Note: legacy world_id also exists in MapModCompanion but is not a namespaced registerable channel for this catalog.
+- VoxelMap | voxelmap:settings | EXACT_CHANNEL
+  Source: minimap-control VoxelHandler.VOXEL_SETTINGS_CHANNEL = "voxelmap:settings" and sends settings payloads on it.
+- Cardinal Components API | cardinal-components:entity_sync, cardinal-components:player_message_c2s, cardinal-components:block_entity_sync, cardinal-components:chunk_sync, cardinal-components:world_sync, cardinal-components:level_sync, cardinal-components:scoreboard_sync, cardinal-components:team_sync | EXACT_CHANNEL
+  Source: ComponentUpdatePayload.id(path) returns Identifier.fromNamespaceAndPath("cardinal-components", path); component modules declare these packet IDs.
+- Axiom Paper Plugin | axiom:enable, axiom:redo_handshake, axiom:response_chunk_data, axiom:response_entity_data, axiom:response_blueprint, axiom:blueprint_manifest, axiom:register_world_properties, axiom:set_world_property, axiom:ack_world_properties, axiom:restrictions, axiom:marker_data, axiom:marker_nbt_response, axiom:annotation_update, axiom:add_server_heightmap, axiom:custom_blocks, axiom:register_custom_block_v2, axiom:ignore_display_entities, axiom:register_custom_items, axiom:update_available_dispatch_sends | EXACT_CHANNEL
+  Source: AxiomPaper registers outgoing plugin channels for the main axiom:* server-to-client paths; VersionHelper.sendCustomPayload call sites send the redo-handshake, dispatch-budget, blueprint, entity, chunk, world-property, marker, annotation, heightmap, custom-block, and custom-item payloads.
+- Consumable Optimizer | consumable_optimizer:disable_payload, consumable_optimizer:handshake_payload | EXACT_CHANNEL
+  Source: public server opt-out example registers consumable_optimizer:disable_payload as outgoing and consumable_optimizer:handshake_payload as incoming.
+- FastCrystal | clientcrystal:disable_fast_crystal, fastcrystal:disable_fast_crystal | EXACT_CHANNEL
+  Source: public server opt-out docs show Paper/Spigot sending clientcrystal:disable_fast_crystal and Fabric server payload id fastcrystal:disable_fast_crystal.
+- OptiPlus | optiplus:disable, optiplus-crystal:disable, optiplus-anchor:disable | EXACT_CHANNEL
+  Source: public OptiPlus Crystal/Anchor docs state Paper/Spigot/Bukkit servers register/send optiplus-crystal:disable and optiplus-anchor:disable; optiplus:disable disables both variants.
+- InteractiveChat | interchat:main | EXACT_CHANNEL
+  Source: InteractiveChat registers interchat:main as incoming/outgoing Bukkit plugin channel; Bungee/Velocity proxy code registers and sends the same channel.
+- AuthMeReloaded | authme:main | EXACT_CHANNEL
+  Source: AuthMe BukkitService sends authme:main; BungeeSender/BungeeReceiver register authme:main; Bungee and Velocity bridges declare/register/send the same authme:main bridge channel.
+- LimboAuth | limboauth:mod/541f59e4256a337ea252bc482a009d46 | EXACT_CHANNEL
+  Source: LimboAuth MOD_CHANNEL is MinecraftChannelIdentifier.create("limboauth", "mod/541f59e4256a337ea252bc482a009d46"); token messages are sent through getChannelIdentifier(player).
+- FastLogin | fastlogin:succ, fastlogin:ch-st, fastlogin:force | EXACT_CHANNEL
+  Source: FastLogin NamespaceKey lowercases plugin name + message channel. SuccessMessage.SUCCESS_CHANNEL = "succ"; ChangePremiumMessage.CHANGE_CHANNEL = "ch-st"; LoginActionMessage.FORCE_CHANNEL = "force"; Bukkit/Velocity register/send these namespaced channels when proxy support is enabled.
+
+Shared transport only:
+- DeluxeMenus | BungeeCord | SHARED_TRANSPORT
+  Source: DeluxeMenus registers/sends legacy BungeeCord for connect-style actions. No deluxemenus:* channel was proven.
+- ChestShop-3 | BungeeCord | SHARED_TRANSPORT
+  Source: ChestShop registers/sends legacy BungeeCord. No chestshop:* channel was proven.
+- ShopChest | BungeeCord | SHARED_TRANSPORT
+  Source: ShopChest registers/sends legacy BungeeCord. No shopchest:* channel was proven.
+
+Audited public repos/docs with no direct client payload channel found in the source pass:
+- CrazyAuctions | NO_PUBLIC_CHANNEL_FOUND
+- CrazyCrates | NO_PUBLIC_CHANNEL_FOUND
+- Shopkeepers | NO_PUBLIC_CHANNEL_FOUND
+- EconomyShopGUI | TEMPLATE_ONLY
+  Public resource/docs prove a common GUI shop plugin, but no exact custom payload/plugin-message channel was exposed.
+- ShopGUI+ | TEMPLATE_ONLY
+  Premium/public docs prove a common GUI shop plugin, but no exact custom payload/plugin-message channel was exposed.
+- UltimateShop | TEMPLATE_ONLY
+  Public Hangar/Modrinth listing proves a modern shop plugin. No exact client payload channel was found in public docs.
+- ExcellentShop | TEMPLATE_ONLY
+  Public source/listing proves shop/chest-shop/auction-house functionality. No exact client payload channel was proven.
+- SimpleShop / SimpleShopGUI / Shop X / BetterShop(s) | TEMPLATE_ONLY
+  Public listings/repos prove real shop plugins. No exact client payload channel was found in the public docs/source pass.
+- zAuctionHouse | TEMPLATE_ONLY
+  Public repo/listing proves a common auction-house plugin. No exact client payload channel was proven.
+- PlayerAuctions | TEMPLATE_ONLY
+  Public listing/source proves an auction-house plugin. No exact client payload channel was proven.
+- AuctionHouse / AuctionHousePlugin / AuctionHouse Rewrite | TEMPLATE_ONLY
+  Public repos/listings prove GUI auction-house plugins. No exact client payload channel was proven.
+- AuctionMaster / DeluxeAuctions / AuctionGUI+ / AxAuctions / OutAuction / FAuction / NexusAuctionHouse | TEMPLATE_ONLY
+  Public listings/repos prove common auction-house plugins. No exact client payload channel was proven.
+- WorldGuard | NO_PUBLIC_CHANNEL_FOUND
+- PlotSquared | NO_PUBLIC_CHANNEL_FOUND
+- GriefPrevention | NO_PUBLIC_CHANNEL_FOUND
+- Towny | NO_PUBLIC_CHANNEL_FOUND
+- BentoBox | NO_PUBLIC_CHANNEL_FOUND
+- PlayerVaults | NO_PUBLIC_CHANNEL_FOUND
+- LWCX | NO_PUBLIC_CHANNEL_FOUND
+- ExcellentCrates | NO_PUBLIC_CHANNEL_FOUND
+- CrateReloaded | NO_PUBLIC_CHANNEL_FOUND
+- MagicCrates | NO_PUBLIC_CHANNEL_FOUND
+- SimpleLootCrates | NO_PUBLIC_CHANNEL_FOUND
+- Public crate variants such as CrazyCratesPlus, ExcellentCratesPlus, GoldenCratesPlus, AdvancedCratesPlus, MineCrates, WonderCrates, SurpriseCrates, NightCrates, CloudCrates, and EmberCrates | TEMPLATE_ONLY
+  Names kept as editable templates for real-world discovery. No exact client payload channel proof was found in the public source/docs pass.
+- ClaimMessenger / ClaimMaps | EXACT_CHANNEL
+  Exact claimmaps:* entries are proven above; related claimmaps/claimmessenger templates remain for user-completed variants.
+- Open Parties and Claims / OpenPAC | EXACT_CHANNEL
+  Exact openpartiesandclaims:main is proven above; openpac:* is kept as an alias template only.
+- FTB Chunks / FTB Teams | EXACT_CHANNEL
+  Exact mod payload IDs are proven above and remain useful fingerprints for claimed chunks/teams style servers.
+- Region/land templates such as WorldProtection, WorldProtector, RegionClaim, RegionClaims, Landlord, RealEstate, AreaSell, ClaimBlocks, ChunkyClaims, and BetterChunkClaims | TEMPLATE_ONLY
+  Added as editable discovery templates. No exact client payload channel proof was found in the public source/docs pass.
+- Polymer | TEMPLATE_ONLY
+  Source pass found Polymer networking APIs for downstream CustomPacketPayload identifiers, but no single fixed public polymer:* channel that should be marked exact.
+- Litematica / MaLiLib / MiniHUD / Tweakeroo | NO_PUBLIC_CHANNEL_FOUND
+  Source pass did not find fixed custom payload/plugin-message channels in the audited branches.
+- JourneyMap / JourneyMap API | PARTIAL
+  TeamJM public API snapshot did not expose a fixed payload channel, but minimap-control exposes the registerable JourneyMap permission channel listed above.
+- Oraxen | NO_PUBLIC_CHANNEL_FOUND
+  Source pass showed resource/tag/NMS handling and no proven client plugin-message channel. Keep oraxen:* as a template.
+- FancyHolograms / DecentHolograms | NO_PUBLIC_CHANNEL_FOUND
+  Source pass found entity/text display implementation, not client plugin-message channels.
+- FancyNpcs / Citizens | SHARED_TRANSPORT
+  Source pass showed BungeeCord usage for server transfer/action behavior, not plugin-specific fancynpcs:* or citizens:* client channels.
+- Plan / spark / PlaceholderAPI / ProtocolLib / PacketEvents / eco / EcoItems / EcoEnchants / EcoSkills / Nova / CrazyVouchers | NO_PUBLIC_CHANNEL_FOUND
+  Source pass found APIs, packet wrappers, persistent-data keys, commands, or web/network internals, but no fixed client plugin-message/custom-payload channel that should be marked exact.
+- SimpleShopGUI / Kiran Auction House / AstraAuctions / Shops / Minepacks / BackPacksPlus | NO_PUBLIC_CHANNEL_FOUND
+  Source pass found GUI/command/storage logic and, for Minepacks, BungeeCord configuration references, but no fixed client plugin-message/custom-payload channel that should be marked exact.
+- HuskHomes / HuskTowns | SHARED_TRANSPORT
+  Source pass showed BungeeCord plugin-message transport for cross-server operations, not plugin-specific huskhomes:* or husktowns:* client channels.
+- CommandPanels | SHARED_TRANSPORT
+  Source/docs show BungeeCord-style cross-server command actions and Floodgate forms, but no commandpanels:* client channel was proven.
+- Grim / GrimAC | SHARED_TRANSPORT/NO_PUBLIC_CLIENT_CHANNEL_FOUND
+  Source pass showed BungeeCord proxy alert transport plus clientbound/clientbound wrapper inspection for anti-exploit checks, but no grim:* or grimac:* server-to-client exact channel was proven.
+- LibreLogin / BungeeGuard / LoginSecurity | TEMPLATE_ONLY/NO_PUBLIC_CLIENT_CHANNEL_FOUND
+  Source/docs pass found auth/proxy/login integration, PacketEvents/Netty/login-phase handling, or proxy handshake behavior, but no proven fixed client plugin-message channel except the exact auth channels listed above.
+- nLogin / other auth templates | TEMPLATE_ONLY
+  Kept as editable discovery templates until public source/docs or observed register traffic proves exact channels.
+- Crate and gambling templates such as CrazyCrates, ExcellentCrates, GoldenCrates, CrateReloaded, MagicCrates, SimpleLootCrates, CratesPlus, CasinoSlots, SlotMachine, CoinFlip, Jackpot, Lottery, Roulette, Blackjack, Crash, Plinko, and CaseBattle | TEMPLATE_ONLY/NO_PUBLIC_CLIENT_CHANNEL_FOUND
+  Public source/listing pass found command/GUI/plugin logic or no accessible source, but no fixed client plugin-message/custom-payload channel that should be marked exact. Scanner command/GUI detection handles these as features unless exact payload evidence is observed.
+
+Special notes:
+- Oraxen | TAG_PACKET_ONLY/TEMPLATE_ONLY
+  Public source grep showed tag/network serialization code, not a proven Bukkit plugin-message channel. Keep oraxen:* as a template until exact custom payload evidence is observed.
+- Premium/closed-source plugins such as ShopGUI+, EconomyShopGUI premium, AuctionGUIPlus, and many crate/casino plugins remain TEMPLATE_ONLY unless official docs or observed registration packets prove exact channels.
+
+Audit sources:
+- https://docs.papermc.io/paper/dev/plugin-messaging/
+- https://www.spigotmc.org/wiki/bukkit-bungee-plugin-messaging-channel/
+- https://github.com/ViaVersion/ViaVersion/wiki/Server-and-Player-Details-Protocol
+- https://docs.coreprotect.net/api/networking/
+- https://github.com/QuickShop-Community/QuickShop-Hikari
+- https://github.com/EngineHub/WorldEdit
+- https://github.com/PlayPro/CoreProtect
+- https://github.com/henkelmax/simple-voice-chat
+- https://github.com/plasmoapp/plasmo-voice
+- https://github.com/GeyserMC/Floodgate
+- https://github.com/GeyserMC/Geyser
+- https://github.com/NEZNAMY/TAB
+- https://github.com/LuckPerms/LuckPerms
+- https://github.com/SkinsRestorer/SkinsRestorer
+- https://github.com/KosmX/emotes
+- https://github.com/EssentialGG/Essential
+- https://github.com/LabyMod/labymod4-server-api
+- https://docs.labymod.net/pages/server/protocol/protocol/
+- https://docs.labymod.net/pages/server/protocol/onjoin/
+- https://github.com/FabricMC/fabric
+- https://github.com/turikhay/MapModCompanion
+- https://github.com/funniray/minimap-control
+- https://github.com/Ladysnake/Cardinal-Components-API
+- https://github.com/Moulberry/AxiomPaperPlugin
+- https://github.com/Walksy/ConsumableOptimizer
+- https://github.com/MrBubles/FastCrystal
+- https://modrinth.com/mod/optipluscrystal
+- https://modrinth.com/mod/optiplus-anchor
+- https://github.com/LOOHP/InteractiveChat
+- https://github.com/AuthMe/AuthMeReloaded
+- https://github.com/kyngs/LibreLogin
+- https://github.com/lucko/BungeeGuard
+- https://github.com/Elytrium/LimboAuth
+- https://github.com/games647/FastLogin
+- https://github.com/lenis0012/LoginSecurity
+- https://github.com/HelpChat/DeluxeMenus
+- https://github.com/ChestShop-authors/ChestShop-3
+- https://github.com/EpicEricEE/ShopChest
+- https://github.com/Crazy-Crew/CrazyAuctions
+- https://www.spigotmc.org/resources/economyshopgui.69927/
+- https://www.spigotmc.org/resources/shopgui-1-8-1-21.6515/
+- https://hangar.papermc.io/PQguanfang/UltimateShop
+- https://github.com/nulli0n/ExcellentShop-spigot
+- https://github.com/GroupeZ-dev/zAuctionHouse
+- https://www.spigotmc.org/resources/player-auctions-let-your-players-sell-items-1-7-1-21-11.83073/
+- https://github.com/kiranhart/Auction-House
+- https://hangar.papermc.io/ElaineQheart/AuctionHousePlugin
+- https://github.com/Florianpal1/FAuction
+- https://www.spigotmc.org/resources/auctiongui-1-8-1-21.19015/
+- https://www.spigotmc.org/resources/axauctions-all-in-one-auction-house-plugin.115308/
+- https://www.spigotmc.org/resources/auctionmaster-1-8-1-21-6-mysql-sqlite-auctions-categories-bin-fully-configurable.84784/
+- https://modrinth.com/project/YB4yzc5J
+- https://modrinth.com/project/vzuZrLuc
+- https://github.com/TFAGaming/SimpleShopGUI
+- https://www.spigotmc.org/resources/shop-x.70773/
+- https://www.spigotmc.org/resources/better-shops.1758/
+- https://github.com/Crazy-Crew/CrazyCrates
+- https://github.com/Shopkeepers/Shopkeepers
+- https://github.com/EngineHub/WorldGuard
+- https://github.com/JustAHuman-xD/ClaimMessenger
+- https://github.com/thexaero/open-parties-and-claims
+- https://github.com/FTBTeam/FTB-Chunks
+- https://github.com/FTBTeam/FTB-Teams
+- https://github.com/Hazebyte/CrateReloaded
+- https://github.com/Hebbinkpro/MagicCrates
+- https://github.com/Minebench/SimpleLootCrates
+- https://github.com/oraxen/oraxen
+- https://github.com/FancyMcPlugins/FancyHolograms
+- https://github.com/FancyMcPlugins/FancyNpcs
+- https://github.com/DecentSoftware-eu/DecentHolograms
+- https://github.com/CitizensDev/Citizens2
+- https://github.com/plan-player-analytics/Plan
+- https://github.com/lucko/spark
+- https://github.com/PlaceholderAPI/PlaceholderAPI
+- https://github.com/dmulloy2/ProtocolLib
+- https://github.com/retrooper/packetevents
+- https://github.com/WiIIiam278/HuskHomes
+- https://github.com/WiIIiam278/HuskTowns
+- https://github.com/GrimAnticheat/Grim
+- https://github.com/rockyhawk64/CommandPanels
+- https://github.com/Patbox/polymer
+- https://github.com/maruohon/litematica
+- https://github.com/maruohon/malilib
+- https://github.com/maruohon/minihud
+- https://github.com/maruohon/tweakeroo
